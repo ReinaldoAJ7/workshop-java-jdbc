@@ -4,7 +4,9 @@ package gui;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 import db.DbException;
 import gui.listener.DataChangeListener;
@@ -19,6 +21,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import model.entities.Department;
+import model.exceptions.ValidationException;
 import model.services.DepartmentService;
 
 public class DepartmentFormController implements Initializable {
@@ -57,6 +60,10 @@ public class DepartmentFormController implements Initializable {
 			 notifyDataChangeListeners();;
 			 Utils.currentStage(event).close();
 		} 
+		catch (ValidationException e) {
+			setErrorMessages(e.getErrors());//Exibindo as mensagens de erro no formulário
+			 Alerts.showAlert("Error", "Validation error", e.getMessage(), AlertType.ERROR);
+		}
 		catch (DbException e) {
 			Alerts.showAlert("Error", "Error saving department", e.getMessage(), AlertType.ERROR);
 		}
@@ -74,8 +81,20 @@ public class DepartmentFormController implements Initializable {
 	//O objeto Department é então retornado.
 	private Department getFormData() {
 		Department obj = new Department();
+		
+		ValidationException exception = new ValidationException("Validation error");
+		
 		obj.setId(Utils.tryParseToInt(txtId.getText()));
+		
+		if (txtName.getText() == null || txtName.getText().trim().equals("")) {
+			exception.addError("name", "Field can't be empty");
+		}
 		obj.setName(txtName.getText());
+		
+		if (exception.getErrors().size() > 0) {
+			throw exception;
+		}
+		
 		return obj;
 	}
 	
@@ -115,5 +134,12 @@ public class DepartmentFormController implements Initializable {
 		txtName.setText(entity.getName()); //Exibindo o nome do departamento no campo de texto
 	}
 	
+	private void setErrorMessages(Map<String, String> errors) {
+		Set<String> fields = errors.keySet();
+		
+		if (fields.contains("name")) {
+			lblErrorName.setText(errors.get("name"));
+		}
+	}
 	
 }
