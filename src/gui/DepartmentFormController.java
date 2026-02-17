@@ -2,9 +2,12 @@ package gui;
 
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import db.DbException;
+import gui.listener.DataChangeListener;
 import gui.util.Alerts;
 import gui.util.Constraints;
 import gui.util.Utils;
@@ -22,6 +25,10 @@ public class DepartmentFormController implements Initializable {
 
 	@FXML
 	private DepartmentService service;
+	
+	@FXML
+	private List<DataChangeListener> dataChangeListeners = new ArrayList<>();
+	
 	@FXML
 	private Department entity;	
 	@FXML
@@ -47,6 +54,7 @@ public class DepartmentFormController implements Initializable {
 			entity = getFormData();
 			service.saveOrUpdate(entity);
 			 Alerts.showAlert("Success", "Department saved successfully", null, AlertType.INFORMATION);
+			 notifyDataChangeListeners();;
 			 Utils.currentStage(event).close();
 		} 
 		catch (DbException e) {
@@ -54,6 +62,12 @@ public class DepartmentFormController implements Initializable {
 		}
 	}
 	
+	private void notifyDataChangeListeners() {
+		for (DataChangeListener listener : dataChangeListeners) {
+			listener.onDataChanged();
+		}
+	}
+
 	//Método para ler os dados do formulário e criar um objeto Department
 	//a partir desses dados. Ele tenta converter o texto do campo de ID 
 	//para um inteiro e atribui o nome do departamento ao objeto. 
@@ -82,6 +96,11 @@ public class DepartmentFormController implements Initializable {
 	
 	public void setDepartmentService(DepartmentService service) {
 		this.service = service;
+	}
+	
+	@FXML
+	public void subscribeDataChangeListener(DataChangeListener listener) {
+		dataChangeListeners.add(listener);//Adiciona um ouvinte à lista de ouvintes de mudança de dados
 	}
 	
 	public void setDepartment(Department entity) {
