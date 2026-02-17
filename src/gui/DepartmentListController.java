@@ -45,7 +45,7 @@ public class DepartmentListController implements Initializable{
 	
 	@FXML
 	public void onBtnNewAction(ActionEvent event) {
-		Stage parentStage = Utils.currentStage(event.getSource());
+		Stage parentStage = Utils.currentStage(event);
 		Department obj = new Department();
 		createDialogForm(obj, "/gui/DepartmentForm.fxml", parentStage);
 	}
@@ -54,7 +54,7 @@ public class DepartmentListController implements Initializable{
 	public void setDepartmentService(DepartmentService service) {
 		this.service = service;
 	}
-
+	
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
 		initializeNodes();
@@ -86,6 +86,7 @@ public class DepartmentListController implements Initializable{
 			
 			DepartmentFormController controller = loader.getController();
 			controller.setDepartment(obj);
+			controller.setDepartmentService(new DepartmentService());
 			controller.updateFormData();
 			
 			// Create the dialog stage
